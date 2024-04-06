@@ -76,7 +76,7 @@ $(document).ready(function () {
 
 
 	//used for SJF and SRJF, finds the index of the next available smallest job
-	function findSmallestBurstIndex(processArray) {
+	function findSmallestBurstIndex() {
 		var smallestIndex = 0;
 		var smallestBurst = 0;
 
@@ -546,7 +546,7 @@ $(document).ready(function () {
 	sortArriveTimes();
 	while (isDone() == false) {
 		fillGaps();
-		var i = findSmallestBurstIndex(processArray);
+		var i = findSmallestBurstIndex();
 		processArray[i].burstTime--;
 		bar.addItem(processArray[i].processName, 1);
 		if(processArray[i].burstTime==0){
@@ -570,7 +570,7 @@ $(document).ready(function () {
 		sortArriveTimes();
 		while (isDone() == false) {
 			fillGaps();
-			var i = findLargestBurstIndex(processArray);
+			var i = findLargestBurstIndex();
 			processArray[i].burstTime--;
 			bar.addItem(processArray[i].processName, 1);
 			if(processArray[i].burstTime==0){
@@ -594,7 +594,7 @@ $(document).ready(function () {
 		sortArriveTimes();
 		while (isDone() == false) {
 			fillGaps();
-			var i = findSmallestPriorityIndex(processArray);
+			var i = findSmallestPriorityIndex();
 			processArray[i].burstTime--;
 			bar.addItem(processArray[i].processName, 1);
 			if(processArray[i].burstTime==0){
@@ -645,6 +645,30 @@ $(document).ready(function () {
 			}
 		}
 
+	//Highest Response Ratio Next
+	function HRRN(){
+		sortArriveTimes();
+		function resposeRatio(i){
+			var waiting = position - processArray[i].arrivalTime;
+			return (waiting + processArray[i].burstTime)/processArray[i].burstTime;
+		}
+		while(isDone()==false){
+			var maxuimumResponseRatio=-1;
+			var maxuimumResponseRatioIndex;
+			//finding maxuimum response ratio
+			console.log(processArray[0].done==false && processArray[0].arrivalTime <= position && resposeRatio(0) > maxuimumResponseRatio);
+			for(var i=0;i<processArray.length;i++){
+				if(processArray[i].done==false && processArray[i].arrivalTime <= position && resposeRatio(i) > maxuimumResponseRatio){
+					maxuimumResponseRatioIndex=i;
+					maxuimumResponseRatio=resposeRatio(i);
+				}
+			}
+			fillGaps();
+			bar.addItem(processArray[maxuimumResponseRatioIndex].processName, processArray[maxuimumResponseRatioIndex].burstTime);
+			processArray[maxuimumResponseRatioIndex].finished();
+		}
+	}
+
 	function run() {
 		loadValues();
 
@@ -669,6 +693,12 @@ $(document).ready(function () {
 			else if (algorithm == "SJF") {
 				$("#algorithm_explanation").text("Shortest Job First will execute proccesses from smallest to biggest");
 				SJF();
+				processTotal = processArray;
+			}
+
+			else if (algorithm == "HRRN") {
+				$("#algorithm_explanation").text("Shortest Job First will execute proccesses from smallest to biggest");
+				HRRN();
 				processTotal = processArray;
 			}
 
@@ -1173,6 +1203,10 @@ $("#explanation").click(function (){
 	}
 
 	else if(Selectedalgorithm == 'SJF'){
+		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span>: Arrival Time Sorting is done. Now We will sort the processes according to thier burst time to select Shortest Job first</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Burst Time : '+ mainOutput.o_bursttime.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span> <span class="step">Step 3 </span>: Burst time sorting is done. Now processes will be scheduled as per thier burst time. Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 4 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
+	}
+
+	else if(Selectedalgorithm == 'HRRN'){
 		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span>: Arrival Time Sorting is done. Now We will sort the processes according to thier burst time to select Shortest Job first</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Burst Time : '+ mainOutput.o_bursttime.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span> <span class="step">Step 3 </span>: Burst time sorting is done. Now processes will be scheduled as per thier burst time. Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 4 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
 	}
 
