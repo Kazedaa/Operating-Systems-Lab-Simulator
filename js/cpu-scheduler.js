@@ -612,58 +612,38 @@ $(document).ready(function () {
 		}
 
 	function roundRobin() {
-		function findNextJump(index) {
-			while (true) {
-
-				if (processArray[index].burstTime <= timeQuantum
-					&& processArray[index].done == false
-					&& processArray[index].arrivalTime <= position) {
-					bar.addItem(processArray[index].processName, processArray[index].burstTime);
-					processArray[index].finished();
-
-					// console.log("finished:"+processArray[index].processName + "  postion:"+position);
-					index = (index + 1) % processArray.length
-					return index;
-					break;
-				}
-
-				if (processArray[index].done == false
-					&& processArray[index].arrivalTime <= position
-					&& processArray[index].burstTime > timeQuantum) {
-					// console.log("switched to:"+processArray[index].processName);
-					processArray[index].burstTime -= timeQuantum;
-					bar.addItem(processArray[index].processName, timeQuantum);
-
-
-
-
-				}
-
-				index = (index + 1) % processArray.length
-
-
-
-
-			}
-
-
-
-
+		var BurstTimeCopy=[];
+		for (var i = 0; i < processArray.length; i++){
+			BurstTimeCopy[i]=processArray[i].burstTime;
 		}
-
-		var i = 0;
-
 		sortArriveTimes();
 		while (isDone() == false) {
 
+			//retreive index
+			var i=0;
+			while(processArray[i].done==true && processArray[i].arrivalTime > position){
+				i++;
+			}
 			fillGaps();
-
-			// console.log("starting:"+processArray[i].processName);
-
-			i = findNextJump(i);
-
+			if (processArray[i].burstTime > timeQuantum){
+				processArray[i].burstTime-=timeQuantum;
+				bar.addItem(processArray[i].processName, timeQuantum);
+				//pop and push
+				processArray.push(processArray.splice(i,1));
+			}
+			else {
+				bar.addItem(processArray[i].processName,processArray[i].burstTime);
+				processArray[i].burstTime=0;
+				processArray[i].done=true;
+				processArray[i].finished();
+			}
 		}
-	}
+	
+		//copy back
+		for (var i = 0; i < processArray.length; i++){
+			processArray[i].burstTime=BurstTimeCopy[i];
+			}
+		}
 
 	function run() {
 		loadValues();
@@ -718,7 +698,7 @@ $(document).ready(function () {
 			}
 
 
-
+			console.log(algorithm)
 			if (algorithm == "Priority_p") {
 				$(".priority").collapse("show");
 				$("#algorithm_explanation").text("Priority Scheduling will execute each process according to the assigned priority. In this case a lower priority number is better.");
