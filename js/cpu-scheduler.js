@@ -76,7 +76,7 @@ $(document).ready(function () {
 
 
 	//used for SJF and SRJF, finds the index of the next available smallest job
-	function findSmallestBurstIndex() {
+	function findSmallestBurstIndex(processArray) {
 		var smallestIndex = 0;
 		var smallestBurst = 0;
 
@@ -515,9 +515,6 @@ $(document).ready(function () {
 			processArray[i].finished();
 		}
 
-
-
-
 	}
 	function SJF() {
 		sortArriveTimes();
@@ -526,7 +523,7 @@ $(document).ready(function () {
 
 			fillGaps();
 
-			var i = findSmallestBurstIndex();
+			var i = findSmallestBurstIndex(processArray);
 
 			bar.addItem(processArray[i].processName, processArray[i].burstTime);
 
@@ -552,113 +549,95 @@ $(document).ready(function () {
 		}
 
 	}
-
-	//Shortes Remaining Job First algorithm
-	function SRJF() {
-
-
-		function findNextJump(proccessIndex) {
-			var interruptFound = false;
-
-			for (var i = 0; i < processArray.length; i++) {
-				if (processArray[i].done == false
-					&& processArray[i].arrivalTime <=position
-					&& processArray[i].burstTime < processArray[proccessIndex].burstTime
-					)
-					//my comment
-					// && processArray[i].arrivalTime < position + processArray[proccessIndex].burstTime
-					// && processArray[i].arrivalTime > processArray[proccessIndex].arrivalTime
-					// && processArray[i].burstTime < processArray[proccessIndex].burstTime
-					// && i != proccessIndex
-					// && processArray[i].hasStarted == false)
-					{
-					// console.log("interupted by:"+processArray[i].processName);
-					processArray[proccessIndex].burstTime -= processArray[i].arrivalTime - position;
-					bar.addItem(processArray[proccessIndex].processName, processArray[i].arrivalTime - position);
-					processArray[proccessIndex].hasStarted = true;
-					interruptFound = true;
-					break;
-				}
-
-
-			}
-
-			if (interruptFound == false) {
-				bar.addItem(processArray[proccessIndex].processName, processArray[proccessIndex].burstTime);
-				processArray[proccessIndex].finished();
-			}
-
-		}
-
+	//Prioirty Non Premptive
+	function priority_np() {
 		sortArriveTimes();
+
 		while (isDone() == false) {
-
-
-			fillGaps();
-
-			var i = findSmallestBurstIndex();
-
-			// console.log("starting:"+processArray[i].processName);
-
-			findNextJump(i);
-
-
-
-
-
-		}
-
-	}
-
-	function priority() {
-
-		function findNextJump(proccessIndex) {
-			var interruptFound = false;
-
-			for (var i = 0; i < processArray.length; i++) {
-				if (processArray[i].done == false
-					&& processArray[i].arrivalTime < position + processArray[proccessIndex].burstTime
-					&& processArray[i].arrivalTime > processArray[proccessIndex].arrivalTime
-					&& processArray[i].priority < processArray[proccessIndex].priority
-					&& i != proccessIndex
-					&& processArray[i].hasStarted == false) {
-					// console.log("interupted by:"+processArray[i].processName);
-					processArray[proccessIndex].burstTime -= processArray[i].arrivalTime - position;
-					bar.addItem(processArray[proccessIndex].processName, processArray[i].arrivalTime - position);
-					processArray[proccessIndex].hasStarted = true;
-					interruptFound = true;
-					break;
-				}
-
-
-			}
-
-			if (interruptFound == false) {
-				bar.addItem(processArray[proccessIndex].processName, processArray[proccessIndex].burstTime);
-				processArray[proccessIndex].finished();
-			}
-
-		}
-
-		sortArriveTimes();
-		while (isDone() == false) {
-
 
 			fillGaps();
 
 			var i = findSmallestPriorityIndex();
 
-			// console.log("starting:"+processArray[i].processName);
+			bar.addItem(processArray[i].processName, processArray[i].burstTime);
 
-			findNextJump(i);
-
-
-
-
+			processArray[i].finished();
 
 		}
 
 	}
+
+	//Shortest Remaining Job First
+	function SRJF() {
+	var BurstTimeCopy=[];
+	for (var i = 0; i < processArray.length; i++){
+		BurstTimeCopy[i]=processArray[i].burstTime;
+	}
+	sortArriveTimes();
+	while (isDone() == false) {
+		fillGaps();
+		var i = findSmallestBurstIndex(processArray);
+		processArray[i].burstTime--;
+		bar.addItem(processArray[i].processName, 1);
+		if(processArray[i].burstTime==0){
+			processArray[i].done=true;
+			processArray[i].finished();
+		}
+	}
+
+	//copy back
+	for (var i = 0; i < processArray.length; i++){
+		processArray[i].burstTime=BurstTimeCopy[i];
+		}
+	}
+
+	//Largest Remaining Time First
+	function LRTF() {
+		var BurstTimeCopy=[];
+		for (var i = 0; i < processArray.length; i++){
+			BurstTimeCopy[i]=processArray[i].burstTime;
+		}
+		sortArriveTimes();
+		while (isDone() == false) {
+			fillGaps();
+			var i = findLargestBurstIndex(processArray);
+			processArray[i].burstTime--;
+			bar.addItem(processArray[i].processName, 1);
+			if(processArray[i].burstTime==0){
+				processArray[i].done=true;
+				processArray[i].finished();
+			}
+		}
+	
+		//copy back
+		for (var i = 0; i < processArray.length; i++){
+			processArray[i].burstTime=BurstTimeCopy[i];
+			}
+		}
+
+	//Priority Premptive
+	function priority_p() {
+		var BurstTimeCopy=[];
+		for (var i = 0; i < processArray.length; i++){
+			BurstTimeCopy[i]=processArray[i].burstTime;
+		}
+		sortArriveTimes();
+		while (isDone() == false) {
+			fillGaps();
+			var i = findSmallestPriorityIndex(processArray);
+			processArray[i].burstTime--;
+			bar.addItem(processArray[i].processName, 1);
+			if(processArray[i].burstTime==0){
+				processArray[i].done=true;
+				processArray[i].finished();
+			}
+		}
+	
+		//copy back
+		for (var i = 0; i < processArray.length; i++){
+			processArray[i].burstTime=BurstTimeCopy[i];
+			}
+		}
 
 	function roundRobin() {
 
@@ -719,59 +698,6 @@ $(document).ready(function () {
 		}
 	}
 
-
-	// Longest Remaining Time first
-	function LRTF() {
-
-
-		function findNextJump(proccessIndex) {
-			var interruptFound = false;
-
-			for (var i = 0; i < processArray.length; i++) {
-				if (processArray[i].done == false
-					&& processArray[i].arrivalTime < position + processArray[proccessIndex].burstTime
-					&& processArray[i].arrivalTime > processArray[proccessIndex].arrivalTime
-					&& processArray[i].burstTime < processArray[proccessIndex].burstTime
-					&& i != proccessIndex
-					&& processArray[i].hasStarted == false) {
-					// console.log("interupted by:"+processArray[i].processName);
-					processArray[proccessIndex].burstTime -= processArray[i].arrivalTime - position;
-					bar.addItem(processArray[proccessIndex].processName, processArray[i].arrivalTime - position);
-					processArray[proccessIndex].hasStarted = true;
-					interruptFound = true;
-					break;
-				}
-
-
-			}
-
-			if (interruptFound == false) {
-				bar.addItem(processArray[proccessIndex].processName, processArray[proccessIndex].burstTime);
-				processArray[proccessIndex].finished();
-			}
-
-		}
-
-		sortArriveTimes();
-		while (isDone() == false) {
-
-
-			fillGaps();
-
-			var i = findLargestBurstIndex();
-
-			// console.log("starting:"+processArray[i].processName);
-
-			findNextJump(i);
-
-
-
-
-
-		}
-
-	}
-
 	function run() {
 		loadValues();
 
@@ -826,10 +752,17 @@ $(document).ready(function () {
 
 
 
-			if (algorithm == "Priority") {
+			if (algorithm == "Priority_p") {
 				$(".priority").collapse("show");
 				$("#algorithm_explanation").text("Priority Scheduling will execute each process according to the assigned priority. In this case a lower priority number is better.");
-				priority();
+				priority_p();
+				processTotal = processArray;
+			}
+
+			else if (algorithm == "Priority_np") {
+				$(".priority").collapse("show");
+				$("#algorithm_explanation").text("Priority Scheduling will execute each process according to the assigned priority. In this case a lower priority number is better.");
+				priority_np();
 				processTotal = processArray;
 			}
 
@@ -1297,11 +1230,11 @@ $("#explanation").click(function (){
 		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span>: Arrival Time Sorting is done. Now We will sort the processes according to thier burst time to select Shortest Job first</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Burst Time : '+ mainOutput.o_bursttime.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span> <span class="step">Step 3 </span>: Burst time sorting is done. Now processes will be scheduled as per thier burst time. Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 4 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
 	}
 
-	else if(Selectedalgorithm == 'SJF'){
+	else if(Selectedalgorithm == 'LJF'){
 		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span>: Arrival Time Sorting is done. Now We will sort the processes according to thier burst time to select Longest Job first</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Burst Time : '+ mainOutput.o_bursttime.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span> <span class="step">Step 3 </span>: Burst time sorting is done. Now processes will be scheduled as per thier burst time. Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 4 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
 	}
 
-	else if(Selectedalgorithm == 'Priority'){
+	else if(Selectedalgorithm == 'Priority_np'){
 		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span> : Arrival Time Sorting is done. Now We will sort the processes according to thier Priority to select highest priority process first.</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Priority : '+ mainOutput.o_priority.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span><span class="step">Step 3 </span> :  Sorting is done for priority. Now processes will be scheduled as per thier priority. Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 4 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
 	}
 
@@ -1315,6 +1248,10 @@ $("#explanation").click(function (){
 
 	else if(Selectedalgorithm == 'LRTF'){
 		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span> : Arrival Time Sorting is done. Now We will sort the processes according to thier burst time to select Biggest Job first</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Burst Time : '+ mainOutput.o_bursttime.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span><span class="step">Step 3 </span> : Here We are checking the burst time after each unit of time. If we find any process which has a larger burst time than the current process then we allocate the cpu to that process.</br></br><span class="step">Step 4 </span> : Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 5 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
+	}
+
+	else if(Selectedalgorithm == 'Priority_p'){
+		steps.innerHTML += '</br></br><span><span class="step">Step 2 </span> : Arrival Time Sorting is done. Now We will sort the processes according to thier Priority to select highest priority process first.</span></br><span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Priority : '+ mainOutput.o_priority.sort(function(a,b){return a-b}) + '</span>' +  '</br></br><span><span class="step">Step 3 </span> :  Sorting is done for priority. Now processes will be scheduled as per thier priority. Now We will calculate Turn around Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp TurnAround Time = Completion Time - Arrival Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspTurnaround Time : '+ mainOutput.turnAroundTime +'</span></br></br> <span><span class="step">Step 4 </span> : Now We will calculate Waiting Time. We know that, </br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time = Turn around Time - Burst Time</span></br><span></br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp So,</br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Waiting Time : '+ mainOutput.waitingTime +'</span>';
 	}
 
 });
