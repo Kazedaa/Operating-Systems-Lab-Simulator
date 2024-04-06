@@ -275,24 +275,6 @@ $(document).ready(function () {
 			mainOutput.avgWait = averageWait;
 			mainOutput.utilization = utilization;
 
-			// for(let i=0; i<processArray.length;i++){
-			// 	mainOutput.o_pid.push(processArray[i].processName);
-			// 	mainOutput.o_arrivaltime.push(processArray[i].arrivalTime);
-			// 	mainOutput.o_bursttime.push(processArray[i].burstTime);
-			// 	mainOutput.completionTime.push(processArray[i].finishTime);
-			// 	mainOutput.turnAroundTime.push(processArray[i].finishTime-processArray[i].arrivalTime)
-			// }
-			// console.log(waitTimes);
-			// console.log(processArray[0].finishTime)
-			// console.log(processArray[1].finishTime)
-			// console.log(processArray[2].finishTime)
-
-			// console.log(processArray[0].finishTime-processArray[0].arrivalTime)
-			// console.log(processArray[1].finishTime-processArray[1].arrivalTime)
-			// console.log(processArray[2].finishTime-processArray[2].arrivalTime)
-
-			// console.log(mainOutput)
-			//updates equation
 			Preview.Update();
 		}
 	}
@@ -313,16 +295,6 @@ $(document).ready(function () {
 			this.done = true;
 			this.finishTime = position;
 
-			// 	console.log(this.processName+" finished at position:"+position);
-			// console.log("wait time:"+ (this.finishTime-this.arrivalTime- this.initialBurst));
-
-			// mainOutput.o_pid.push(processName);
-			// mainOutput.o_arrivaltime.push(arrivalTime);
-			// mainOutput.o_bursttime.push(burstTime);
-			// mainOutput.completionTime.push(position);
-			// mainOutput.waitingTime.push((this.finishTime-this.arrivalTime- this.initialBurst));
-			// mainOutput.turnAroundTime.push((this.finishTime-this.arrivalTime));
-			// console.log(mainOutput);
 		}
 	}
 
@@ -640,12 +612,7 @@ $(document).ready(function () {
 		}
 
 	function roundRobin() {
-
-
 		function findNextJump(index) {
-
-
-
 			while (true) {
 
 				if (processArray[index].burstTime <= timeQuantum
