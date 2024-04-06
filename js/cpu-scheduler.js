@@ -159,15 +159,13 @@ $(document).ready(function () {
 
 	//checks if all the processes have completed
 	function isDone() {
-		var done = true;
 		for (var i = 0; i < processArray.length; i++) {
 			if (processArray[i].done == false) {
-				done = false;
-				//console.log("not done   i:"+i);
+				return false
 			}
 		}
 
-		return done;
+		return true;
 	}
 
 
@@ -613,15 +611,15 @@ $(document).ready(function () {
 
 	function roundRobin() {
 		var BurstTimeCopy=[];
+		var i=0;
 		for (var i = 0; i < processArray.length; i++){
 			BurstTimeCopy[i]=processArray[i].burstTime;
 		}
 		sortArriveTimes();
 		while (isDone() == false) {
-
 			//retreive index
-			var i=0;
-			while(processArray[i].done==true && processArray[i].arrivalTime > position){
+			i=0;
+			while(processArray[i].done==true || processArray[i].arrivalTime > position){
 				i++;
 			}
 			fillGaps();
@@ -629,16 +627,15 @@ $(document).ready(function () {
 				processArray[i].burstTime-=timeQuantum;
 				bar.addItem(processArray[i].processName, timeQuantum);
 				//pop and push
-				processArray.push(processArray.splice(i,1));
+				processArray.push(processArray.splice(i,1)[0]);
 			}
 			else {
 				bar.addItem(processArray[i].processName,processArray[i].burstTime);
 				processArray[i].burstTime=0;
-				processArray[i].done=true;
 				processArray[i].finished();
 			}
 		}
-	
+		console.log(isDone() , processArray[i].processName)
 		//copy back
 		for (var i = 0; i < processArray.length; i++){
 			processArray[i].burstTime=BurstTimeCopy[i];
@@ -698,7 +695,6 @@ $(document).ready(function () {
 			}
 
 
-			console.log(algorithm)
 			if (algorithm == "Priority_p") {
 				$(".priority").collapse("show");
 				$("#algorithm_explanation").text("Priority Scheduling will execute each process according to the assigned priority. In this case a lower priority number is better.");
