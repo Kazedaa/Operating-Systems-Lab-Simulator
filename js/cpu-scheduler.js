@@ -611,14 +611,13 @@ $(document).ready(function () {
 
 	function roundRobin() {
 		var BurstTimeCopy=[];
-		var i=0;
 		for (var i = 0; i < processArray.length; i++){
 			BurstTimeCopy[i]=processArray[i].burstTime;
 		}
 		sortArriveTimes();
 		while (isDone() == false) {
 			//retreive index
-			i=0;
+			var i=0;
 			while(processArray[i].done==true || processArray[i].arrivalTime > position){
 				i++;
 			}
@@ -626,16 +625,20 @@ $(document).ready(function () {
 			if (processArray[i].burstTime > timeQuantum){
 				processArray[i].burstTime-=timeQuantum;
 				bar.addItem(processArray[i].processName, timeQuantum);
-				//pop and push
-				processArray.push(processArray.splice(i,1)[0]);
+				var j=processArray.length-1;
+				while(processArray[j].arrivalTime>position && j>-1){
+					j--;
+				}
+				//push and pop
+				processArray.splice(j,0,processArray.splice(i,1)[0]);
 			}
 			else {
 				bar.addItem(processArray[i].processName,processArray[i].burstTime);
 				processArray[i].burstTime=0;
 				processArray[i].finished();
 			}
+			
 		}
-		console.log(isDone() , processArray[i].processName)
 		//copy back
 		for (var i = 0; i < processArray.length; i++){
 			processArray[i].burstTime=BurstTimeCopy[i];
