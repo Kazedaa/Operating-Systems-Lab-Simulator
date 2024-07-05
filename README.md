@@ -1,5 +1,6 @@
 # Virtual OS Lab Simulator
-![OS LAB](https://img.shields.io/badge/CatBot-v1.0-brightgreen)
+![OS LAB](https://img.shields.io/badge/OSLAB-v1.0-brightgreen)
+
 Welcome to the Virtual OS Lab Simulator! This project simulates CPU Scheduling and InterProcess Communication (IPC) between web browser workers using pure JavaScript, CSS, and HTML.
 
 ## Table of Contents
